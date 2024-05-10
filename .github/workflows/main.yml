@@ -48,7 +48,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            sudo docker pull dikocesrt/alta:latest
-            sudo docker stop alta
-            sudo docker rm alta
-            sudo docker run -d --name alta -p 8080:8080 dikocesrt/alta
+            cd /home/ec2-user/alta
+            docker pull dikocesrt/alta:latest
+            docker run -d --name alta -p 1323:1323 dikocesrt/alta:latest
