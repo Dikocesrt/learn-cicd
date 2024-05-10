@@ -34,20 +34,20 @@ jobs:
       - name: push image
         run: docker push dikocesrt/alta:latest
   
-  deployec2:
-    name: deploy ec2
-    needs: buildimage
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: deploy ec2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /home/ec2-user/alta
-            docker pull dikocesrt/alta:latest
-            docker run -d --name alta -p 1323:1323 dikocesrt/alta:latest
+  # deployec2:
+  #   name: deploy ec2
+  #   needs: buildimage
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v2
+  #     - name: deploy ec2
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.SSH_HOST }}
+  #         username: ${{ secrets.SSH_USER }}
+  #         key: ${{ secrets.SSH_KEY }}
+  #         script: |
+  #           cd /home/ec2-user/alta
+  #           docker pull dikocesrt/alta:latest
+  #           docker run -d --name alta -p 1323:1323 dikocesrt/alta:latest
