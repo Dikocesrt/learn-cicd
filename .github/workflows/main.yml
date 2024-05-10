@@ -1,0 +1,56 @@
+name: running test, build image, push registry, deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  runningtest:
+    name: running test
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20'
+      - name: run test
+        run: go test -v ./... -cover
+
+  buildimage:
+    name: build image
+    needs: runningtest
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install docker
+        run: sudo apt-get install -y docker.io
+      - name: build image
+        run: docker build -t dikocesrt/alta:latest .
+      - name: login registry
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: push image
+        run: docker push dikocesrt/alta:latest
+  
+  deployec2:
+    name: deploy ec2
+    needs: buildimage
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo docker pull dikocesrt/alta:latest
+            sudo docker stop alta
+            sudo docker rm alta
+            sudo docker run -d --name alta -p 8080:8080 dikocesrt/alta
